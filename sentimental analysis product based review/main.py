@@ -1,0 +1,102 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import math
+import warnings
+warnings.filterwarnings('ignore') # Hides warning
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore",category=UserWarning)
+sns.set_style("whitegrid") # Plotting style
+np.random.seed(42) # seeding random number generator
+
+df = pd.read_csv('C:\\Users\\shiva\\Desktop\\sentimental analysis product based review\\amazon.csv')
+
+df.head()
+data = df.copy()
+data.describe()
+data.info()
+data["asins"].unique()
+asins_unique = len(data["asins"].unique())
+print("Number of Unique ASINs: " + str(asins_unique))
+data["reviews.numHelpful"].hist(figsize=(20,5))
+plt.show()
+data["reviews.id"].hist( figsize=(20,5))
+plt.show()
+plt.figure(figsize=(20,5))
+ax1=sns.countplot(x="reviews.rating", data=data)
+for p in ax1.patches:
+    ax1.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+from sklearn.model_selection import StratifiedShuffleSplit
+print("Before : {}".format(len(data)))
+dataAfter = data.dropna(subset=["reviews.rating"])
+# Removes all NAN in reviews.rating
+print("After  : {}".format(len(dataAfter)))
+dataAfter["reviews.rating"] = dataAfter["reviews.rating"].astype(int)
+
+split = StratifiedShuffleSplit(n_splits=10, test_size=0.2)
+for train_index, test_index in split.split(dataAfter,
+                                           dataAfter["reviews.rating"]):
+    strat_train = dataAfter.reindex(train_index)
+    strat_test = dataAfter.reindex(test_index)
+    print(len(strat_train))
+print(len(strat_test))
+round((strat_test["reviews.rating"].value_counts()* 100/len(strat_test)),2)
+reviews = strat_train.copy()
+reviews.head()
+len(reviews["name"].unique())
+len(reviews["asins"].unique())
+reviews.info()
+reviews.groupby("asins")["name"].unique()
+different_names = reviews[reviews["asins"] ==
+                          "B00L9EPT8O,B01E6AO69U"]["name"].unique()
+for name in different_names:
+    print(name)
+    reviews[reviews["asins"] == "B00L9EPT8O,B01E6AO69U"]["name"].value_counts()
+    fig = plt.figure(figsize=(16,10))
+ax1 = plt.subplot(211)
+ax2 = plt.subplot(212, sharex = ax1)
+reviews["asins"].value_counts().plot(kind="bar", ax=ax1, title="ASIN Frequency")
+np.log10(reviews["asins"].value_counts()).plot(kind="bar", ax=ax2,
+                                               title="ASIN Frequency (Log10 Adjusted)")
+for p in ax1.patches:
+    ax1.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+for p in ax2.patches:
+    ax2.annotate(str(round((p.get_height()),2)), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+reviews["reviews.rating"].mean()
+asins_count_ix = reviews["asins"].value_counts().index
+fig = plt.figure(figsize=(16,5))
+ax=reviews["asins"].value_counts().plot(kind="bar", title="ASIN Frequency")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.xticks(rotation=90)
+plt.show()
+fig = plt.figure(figsize=(16,5))
+sns.pointplot(x="asins", y="reviews.rating", order=asins_count_ix, data=reviews)
+plt.xticks(rotation=90)
+plt.show()
+def sentiments(rating):
+    if (rating == 5) or (rating == 4):
+        return "Positive"
+    elif rating == 3:
+        return "Neutral"
+    elif (rating == 2) or (rating == 1):
+        return "Negative"
+# Add sentiments to the data
+strat_train["Sentiment"] = strat_train["reviews.rating"].apply(sentiments)
+strat_test["Sentiment"] = strat_test["reviews.rating"].apply(sentiments)
+print(strat_train["Sentiment"][:15])
+round((strat_train["Sentiment"].value_counts()*100/len(strat_train)),2)
+fig = plt.figure(figsize=(16,5))
+ax=strat_train["Sentiment"].value_counts().plot(kind="bar", title="Train Data Sentimental Data")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+round((strat_test["Sentiment"].value_counts()*100/len(strat_test)),2)
+fig = plt.figure(figsize=(16,5))
+ax=strat_test["Sentiment"].value_counts().plot(kind="bar", title="Test Data Sentimental Data")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()

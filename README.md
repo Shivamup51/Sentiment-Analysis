@@ -33,3 +33,11 @@ Visualized the distribution of sentiment labels in both training and testing dat
 <br>
 
 <p>Overall, your project demonstrates a structured approach to sentiment analysis of product reviews using Python and machine learning. It covers data preprocessing, exploration, visualization, feature engineering, and sentiment classification, providing valuable insights into customer sentiments towards different products.</p>
+<br>
+<img width="956" alt="Screenshot 2024-05-05 030212" src="https://github.com/Shivamup51/Sentiment-Analysis/assets/166123727/d07d1651-faa9-4a85-ba06-0636e54be5cd">
+<img width="957" alt="Screenshot 2024-05-05 030252" src="https://github.com/Shivamup51/Sentiment-Analysis/assets/166123727/1affb41d-d8f5-4d38-95c9-da67b13e9bfc">
+<img width="956" alt="Screenshot 2024-05-05 030314" src="https://github.com/Shivamup51/Sentiment-Analysis/assets/166123727/fe72bcc0-61e4-4cb8-b294-242964fdd128">
+<img width="957" alt="Screenshot 2024-05-05 030334" src="https://github.com/Shivamup51/Sentiment-Analysis/assets/166123727/777eb457-f669-466d-91fc-86383d89d351">
+<img width="118" alt="Screenshot 2024-05-05 030423" src="https://github.com/Shivamup51/Sentiment-Analysis/assets/166123727/fda065f4-8cd9-4394-a7c7-0a69b17fc703">
+
+

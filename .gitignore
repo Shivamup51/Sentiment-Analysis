@@ -1,160 +1,102 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import math
+import warnings
+warnings.filterwarnings('ignore') # Hides warning
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore",category=UserWarning)
+sns.set_style("whitegrid") # Plotting style
+np.random.seed(42) # seeding random number generator
 
-# C extensions
-*.so
+df = pd.read_csv('C:\\Users\\shiva\\Desktop\\sentimental analysis product based review\\amazon.csv')
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+df.head()
+data = df.copy()
+data.describe()
+data.info()
+data["asins"].unique()
+asins_unique = len(data["asins"].unique())
+print("Number of Unique ASINs: " + str(asins_unique))
+data["reviews.numHelpful"].hist(figsize=(20,5))
+plt.show()
+data["reviews.id"].hist( figsize=(20,5))
+plt.show()
+plt.figure(figsize=(20,5))
+ax1=sns.countplot(x="reviews.rating", data=data)
+for p in ax1.patches:
+    ax1.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+from sklearn.model_selection import StratifiedShuffleSplit
+print("Before : {}".format(len(data)))
+dataAfter = data.dropna(subset=["reviews.rating"])
+# Removes all NAN in reviews.rating
+print("After  : {}".format(len(dataAfter)))
+dataAfter["reviews.rating"] = dataAfter["reviews.rating"].astype(int)
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/#use-with-ide
-.pdm.toml
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+split = StratifiedShuffleSplit(n_splits=10, test_size=0.2)
+for train_index, test_index in split.split(dataAfter,
+                                           dataAfter["reviews.rating"]):
+    strat_train = dataAfter.reindex(train_index)
+    strat_test = dataAfter.reindex(test_index)
+    print(len(strat_train))
+print(len(strat_test))
+round((strat_test["reviews.rating"].value_counts()* 100/len(strat_test)),2)
+reviews = strat_train.copy()
+reviews.head()
+len(reviews["name"].unique())
+len(reviews["asins"].unique())
+reviews.info()
+reviews.groupby("asins")["name"].unique()
+different_names = reviews[reviews["asins"] ==
+                          "B00L9EPT8O,B01E6AO69U"]["name"].unique()
+for name in different_names:
+    print(name)
+    reviews[reviews["asins"] == "B00L9EPT8O,B01E6AO69U"]["name"].value_counts()
+    fig = plt.figure(figsize=(16,10))
+ax1 = plt.subplot(211)
+ax2 = plt.subplot(212, sharex = ax1)
+reviews["asins"].value_counts().plot(kind="bar", ax=ax1, title="ASIN Frequency")
+np.log10(reviews["asins"].value_counts()).plot(kind="bar", ax=ax2,
+                                               title="ASIN Frequency (Log10 Adjusted)")
+for p in ax1.patches:
+    ax1.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+for p in ax2.patches:
+    ax2.annotate(str(round((p.get_height()),2)), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+reviews["reviews.rating"].mean()
+asins_count_ix = reviews["asins"].value_counts().index
+fig = plt.figure(figsize=(16,5))
+ax=reviews["asins"].value_counts().plot(kind="bar", title="ASIN Frequency")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.xticks(rotation=90)
+plt.show()
+fig = plt.figure(figsize=(16,5))
+sns.pointplot(x="asins", y="reviews.rating", order=asins_count_ix, data=reviews)
+plt.xticks(rotation=90)
+plt.show()
+def sentiments(rating):
+    if (rating == 5) or (rating == 4):
+        return "Positive"
+    elif rating == 3:
+        return "Neutral"
+    elif (rating == 2) or (rating == 1):
+        return "Negative"
+# Add sentiments to the data
+strat_train["Sentiment"] = strat_train["reviews.rating"].apply(sentiments)
+strat_test["Sentiment"] = strat_test["reviews.rating"].apply(sentiments)
+print(strat_train["Sentiment"][:15])
+round((strat_train["Sentiment"].value_counts()*100/len(strat_train)),2)
+fig = plt.figure(figsize=(16,5))
+ax=strat_train["Sentiment"].value_counts().plot(kind="bar", title="Train Data Sentimental Data")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
+round((strat_test["Sentiment"].value_counts()*100/len(strat_test)),2)
+fig = plt.figure(figsize=(16,5))
+ax=strat_test["Sentiment"].value_counts().plot(kind="bar", title="Test Data Sentimental Data")
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() * 1.01 , p.get_height() * 1.01))
+plt.show()
